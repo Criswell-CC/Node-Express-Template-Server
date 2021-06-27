@@ -12,8 +12,6 @@ router.route('/',)
 //test + work on this
 router.route('/login')
     .get(checkAuth(), (req, res) => {
-
-        //this check can be handled by Redux
         res.send({ loggedIn: true } )
     })
     .post(async (req, res) => {
@@ -27,7 +25,6 @@ router.route('/login')
 
         const loginResult = await users.login(email, password)
 
-        delete password
         delete req.body.password
 
         if (loginResult) {
@@ -42,7 +39,6 @@ router.route('/login')
         }
     
         //could also be database connection error (500)
-        //connect to flash message in front-end
         res.status(401).send("Login check failed")
     })
 
@@ -86,10 +82,9 @@ router.route('/register')
             console.log('Validation errors: ' + errors.join('&&'))
             res.status(422).send({ errors: errors })
             return
-            //error parsing needs to happen somewhere so client-side can display particular errors back
+            
+            //TO DO: error parsing so client-side can display particular errors back
         }
-
-        //const { username, email, password } = req.body
             
         const userInfo = {
             //name: req.body.name,
@@ -135,12 +130,9 @@ router.route('/profile')
 
         res.send(profileData)
 
-        //need to extract user ID from cookie; double check
-        //const profileInfo = await users.getProfile([req.session.userID])
-        //res.send(profileInfo)
     })
     .post(async (req, res) => {
-        //business logic for updating profile
+        //TO DO: implement logic for updating profile
     })
 
 module.exports = router
