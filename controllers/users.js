@@ -14,11 +14,11 @@ module.exports = {
         })
     },
 
-    createUser: async ({userID, username, password, email}) => {
+    createUser: async ({username, password, email}) => {
 
-        //ensure that Express route is checking if userInfo is complete and meets requirements before passing to this method
+        //ensure that Express route is validating userInfo object before passing to this method
 
-        userID = uuidv1()
+        const userID = uuidv1()
 
         const result = await db.query(`INSERT INTO ${process.env.USERTABLE} (userid, username, password, email, date_created) VALUES ($1, $2, $3, $4, $5) RETURNING *`,
         [userID, username, password, email, new Date()])
@@ -26,7 +26,7 @@ module.exports = {
 
         try {
             
-            if (result.rows[0].userid == userInfo.userID)
+            if (result.rows[0].userid == userID)
             {
                 return true
             }
@@ -61,7 +61,7 @@ module.exports = {
 
     checkPassword: async (reqEmail, reqPassword) => {
 
-        //database call to get user password based on userInfo 
+        //database call to get user password based on userInfo object
         const res = await db.query(`SELECT password FROM ${process.env.USERTABLE} WHERE email = $1`, [reqEmail])
         .catch((err) => { 
             console.log("Database connection error: ", err)
@@ -76,13 +76,11 @@ module.exports = {
                return false
            }
 
-            //const passwordCompare = bcrypt.compareSync(reqPassword, hashedPassword,
             const passwordCompare = await bcrypt.compare(reqPassword, hashedPassword)
 
             return passwordCompare 
-    }
+        }
 
-        //shouldn't happen unless client code calls with incorrect username
         return false
 },
 
@@ -147,8 +145,7 @@ module.exports = {
 
     },
 
-
-    //POST callbacks
+    //POST request handling
 
     register: async (userInfo) => {
             
@@ -218,8 +215,10 @@ module.exports = {
                             return value;
                         })
                     .withMessage("Passwords do not match")
+                    
+                    //if phone number field is available
                     //body('entered_phone').optional().isInt(), 
-                    //phone-number is optional... change to allow for dashed
+                    
                 ]
             } 
         }
